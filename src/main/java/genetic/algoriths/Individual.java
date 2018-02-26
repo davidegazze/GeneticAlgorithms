@@ -7,18 +7,21 @@ import java.util.Random;
 class Individual {
 
     private double fitness = 0;
-    double[] genes = null;
+    int[] genes = null;
+    double value = 0;
     private int numberOfGenes = 10;
 
     public Individual(int numberOfGenes) {
-        this.genes = new double[numberOfGenes];
+        this.genes = new int[numberOfGenes];
         this.numberOfGenes = numberOfGenes;
         Random rn = new Random();
         //Set genes randomly for each individual
+        this.value = 0;
         for (int i = 0; i < numberOfGenes; i++) {
-            genes[i] = rn.nextDouble();
+            this.genes[i] = rn.nextInt(2);
+            this.value = (this.value * 2) + this.genes[i];
         }
-        fitness = 0;
+        this.fitness = 0;
     }
 
     public double getFitness() {
@@ -33,11 +36,22 @@ class Individual {
         return this.numberOfGenes;
     }
 
+    public void updateIndividual() {
+        // Update value of individual
+        this.value = 0;
+        for (int i = 0; i < numberOfGenes; i++) {
+            this.value = (this.value * 2) + this.genes[i];
+        }
+        this.fitness = 0;
+    }
+
+
     @Override
     public String toString() {
         return "Individual {" +
             "fitness = " + this.fitness +
             ", genes = " + Arrays.toString(this.genes) +
+            ", value = " + this.value +
             ", Number of genes = " + this.numberOfGenes +
         "}";
     }
@@ -52,5 +66,9 @@ class Individual {
         cloned.setFitness(this.getFitness());
         cloned.genes =  Arrays.copyOf(this.genes, this.numberOfGenes);
         return cloned;
+    }
+
+    public double getValue() {
+        return this.value;
     }
 }

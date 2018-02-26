@@ -8,19 +8,19 @@ package genetic.algoriths;
 public class StartGA {
 
     public static void main(String[] args) throws CloneNotSupportedException {
-        Population population = new Population(100, 1);
+        Population population = new Population(100, 5);
         int generationCount = 0;
-        int maxGenerations = 1000000;
+        int maxGenerations = 10;
         int bestGeneration = 0;
         Individual bestIndividual = population.getFittest();
-        System.out.println("Generation: " + generationCount + " Fittest: " + population.getFittestValue());
+        System.out.println("Generation: " + generationCount + " Fittest: " + population.getFittest().getFitness());
         System.out.println("First " + population.getFittest());
         System.out.println("Second " + population.getSecondFittest());
         System.out.println("Worst " + population.getWorstFittest());
         //While population gets an individual with maximum fitness
         while (true) {
             ++generationCount;
-            System.out.println("Generation: " + generationCount + " ; Fittest: " + population.getFittestValue());
+            System.out.println("Generation: " + generationCount + " ; Fittest: " + population.getFittest().getFitness());
             /*
             System.out.println("First " + population.getFittest());
             System.out.println("Best " + bestIndividual.getFitness());

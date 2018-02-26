@@ -19,8 +19,8 @@ public class Fitness {
 
     //Calculate fitness for x^2 - 11x + 30 = 0
     public double calcFitness(Individual individual) {
-        double value = (individual.genes[0] * individual.genes[0]) - 11 * individual.genes[0] + 30;
-        double fitness = (1/value);
+        double value = (individual.getValue() * individual.getValue()) - 11 * individual.getValue() + 30;
+        double fitness = (1/(1+Math.abs(value)));
         return fitness;
     }
 }
