@@ -1,26 +1,31 @@
 package genetic.algoriths;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.Random;
+import java.util.stream.*;
 
 //Individual class
 class Individual {
 
     private double fitness = 0;
-    int[] genes = null;
-    double value = 0;
+    private int[] genes = null;
+    private int value = 0;
     private int numberOfGenes = 10;
+
 
     public Individual(int numberOfGenes) {
         this.genes = new int[numberOfGenes];
         this.numberOfGenes = numberOfGenes;
         Random rn = new Random();
-        //Set genes randomly for each individual
-        this.value = 0;
-        for (int i = 0; i < numberOfGenes; i++) {
+        // Set genes randomly for each individual
+        for(int i=0; i<this.numberOfGenes; i++)
             this.genes[i] = rn.nextInt(2);
-            this.value = (this.value * 2) + this.genes[i];
-        }
+        this.updateIndividual();
+    }
+
+    public void updateIndividual() {
+        // Update value of individual
+        this.value = Arrays.stream(this.genes).sum();
         this.fitness = 0;
     }
 
@@ -36,15 +41,40 @@ class Individual {
         return this.numberOfGenes;
     }
 
-    public void updateIndividual() {
-        // Update value of individual
-        this.value = 0;
-        for (int i = 0; i < numberOfGenes; i++) {
-            this.value = (this.value * 2) + this.genes[i];
-        }
-        this.fitness = 0;
+
+    public int compareTo(Individual o1) {
+        if((o1 == null) || (this.getFitness() >= o1.getFitness())) return 1;
+        else return 0;
     }
 
+    public Individual clone() {
+        Individual cloned = new Individual(this.numberOfGenes);
+        cloned.setFitness(this.getFitness());
+        cloned.value = this.value;
+        cloned.genes = Arrays.copyOf(this.genes, this.numberOfGenes);
+        return cloned;
+    }
+
+    public double getValue() {
+        return this.value;
+    }
+
+    public int getGeneValue(int i) {
+        return genes[i];
+    }
+
+    public void setGeneValue(int i, int value) {
+        genes[i] = value;
+    }
+
+    public void inverseGenotype() {
+        int[] newGenes = new int[this.numberOfGenes];
+        for(int i=0; i<this.numberOfGenes; i++) {
+            newGenes[this.numberOfGenes - i -1] = this.genes[i];
+        }
+        this.genes = null;
+        this.genes = newGenes;
+    }
 
     @Override
     public String toString() {
@@ -56,19 +86,4 @@ class Individual {
         "}";
     }
 
-    public int compareTo(Individual o1) {
-        if((o1 == null) || (this.getFitness() > o1.getFitness())) return 1;
-        else return 0;
-    }
-
-    public Individual clone() throws CloneNotSupportedException {
-        Individual cloned = new Individual(this.numberOfGenes);
-        cloned.setFitness(this.getFitness());
-        cloned.genes =  Arrays.copyOf(this.genes, this.numberOfGenes);
-        return cloned;
-    }
-
-    public double getValue() {
-        return this.value;
-    }
 }

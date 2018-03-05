@@ -12,14 +12,15 @@ public class Fitness {
                 ++fitness;
             }
             */
-            fitness += individual.genes[i];
+            fitness += individual.getGeneValue(i);
         }
         return fitness;
     }
 
-    //Calculate fitness for x^2 - 11x + 30 = 0
+    // Calculate fitness for x^2 - 12x + 35.75 = 0
+    // Solution 5.5 and 6.5
     public double calcFitness(Individual individual) {
-        double value = (individual.getValue() * individual.getValue()) - 11 * individual.getValue() + 30;
+        double value = (individual.getValue() * individual.getValue()) - 12 * individual.getValue() + 35.75;
         double fitness = (1/(1+Math.abs(value)));
         return fitness;
     }

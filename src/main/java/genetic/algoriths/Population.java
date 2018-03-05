@@ -7,15 +7,19 @@ class Population {
 
     private int popSize = 10;
     private int numGenes = 10;
+    private double mutationProbability = 10;
     private Individual[] individuals = null;
     private Fitness fitnessCalculator = new Fitness();
     private int bestIndividualIndex = 0;
     private int worstIndividualIndex = 0;
     private int secondIndividualIndex = 0;
+    private Random rn = new Random();
+    private double populationMeanFitness = 0.0;
 
-    public Population(int popSize, int numGenes) {
+    public Population(int popSize, int numGenes, double mutationProbability) {
         this.popSize = popSize;
         this.numGenes = numGenes;
+        this.mutationProbability = mutationProbability;
         this.individuals = new Individual[this.popSize];
         double fitness = 0;
         for (int i = 0; i < this.popSize; i++) {
@@ -23,61 +27,65 @@ class Population {
             fitness = fitnessCalculator.calcFitness(individual);
             individual.setFitness(fitness);
             individuals[i] = individual;
-            System.out.println(individual);
         }
-        this.calculateFitnessPopulation();
+        this.scorePopulation();
     }
 
     public void nextGeneration() {
         // Create a new gemeration
         Random rn = new Random();
+        populationMeanFitness = 0;
         // Do crossover
         crossover();
-
         // Do mutation under a random probability
-        if (rn.nextInt() % 10 < 5) {
-            mutation();
-        }
-        // Add fittest offspring to population
-        addFittestOffspring();
+        mutation();
         // Calculate fitness of population
-        this.updateBestIndividuals();
-        this.calculateFitnessPopulation();
+        this.addFittestOffspring();
+        this.scorePopulation();
     }
 
     // Crossover
     private void crossover() {
-        Random rn = new Random();
         // Select a random crossover point
         int crossOverPoint = rn.nextInt(this.numGenes);
         // Swap values among parents
         for (int i = 0; i < crossOverPoint; i++) {
-            int temp = this.getFittest().genes[i];
-            this.getFittest().genes[i] =  this.getSecondFittest().genes[i];
-            this.getSecondFittest().genes[i] = temp;
+            int temp = this.getFittest().getGeneValue(i);
+            this.getFittest().setGeneValue(i, this.getSecondFittest().getGeneValue(i));
+            this.getSecondFittest().setGeneValue(i, temp);
         }
+        this.updateIndividual(this.getFittest());
+        this.updateIndividual(this.getSecondFittest());
     }
 
     // Mutation by Flip
     private void mutation() {
-        Random rn = new Random();
         // Select a random mutation point
-        int mutationPoint = rn.nextInt(this.numGenes);
-        this.getFittest().genes[mutationPoint] = (1 - this.getFittest().genes[mutationPoint]);
-        mutationPoint = rn.nextInt(this.numGenes);
-        this.getSecondFittest().genes[mutationPoint] = (1 - this.getSecondFittest().genes[mutationPoint]);
+        for(int i=0; i<this.popSize; i++) {
+            for (int j = 0; j < this.numGenes; j++) {
+                double mutation = rn.nextDouble() * 100;
+                if (mutation < this.mutationProbability) {
+                    byte newGene = 0;
+                    if (this.individuals[i].getGeneValue(j) == 0)
+                        newGene = 1;
+                    else
+                        newGene = 0;
+                    this.individuals[i].setGeneValue(j, newGene);
+                }
+            }
+            this.updateIndividual(individuals[i]);
+        }
     }
 
-    private void updateBestIndividuals() {
+    private void inversion(Individual individual) {
+        individual.inverseGenotype();
+        individual.updateIndividual();
+    }
+
+    private void updateIndividual(Individual individual) {
         // Update Value and Fitness
-        System.out.println("old : " + this.getFittest().getValue());
-        System.out.println("old : " + this.getFittest().getFitness());
-        this.getFittest().updateIndividual();
-        this.getFittest().setFitness(fitnessCalculator.calcFitness(this.getFittest()));
-        this.getSecondFittest().updateIndividual();
-        this.getSecondFittest().setFitness(fitnessCalculator.calcFitness(this.getSecondFittest()));
-        System.out.println("new : " + this.getFittest().getValue());
-        System.out.println("new : " + this.getFittest().getFitness());
+        individual.updateIndividual();
+        individual.setFitness(fitnessCalculator.calcFitness(individual));
     }
 
     //Get fittest offspring
@@ -91,21 +99,18 @@ class Population {
     // Replace least fittest individual from most fittest offspring
     private void addFittestOffspring() {
         // Replace least fittest individual from most fittest offspring
-        try {
-            this.individuals[this.worstIndividualIndex] = getFittestOffspring().clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+        this.individuals[this.worstIndividualIndex] = getFittestOffspring().clone();
     }
 
-    private void calculateFitnessPopulation()  {
+    private void scorePopulation()  {
         double bestFitness = 0;
         double worstFitness = 0;
         double secondFitness = 0;
         double fitness = 0;
+        this.populationMeanFitness = 0;
         for (int i = 0; i < this.popSize; i++) {
             fitness = individuals[i].getFitness();
-            //System.out.println(i + " " + fitness + " " + bestFitness + " " + secondFitness + " " + worstFitness);
+            this.populationMeanFitness += fitness;
             // Perform Stats
             // Best
             if(fitness > bestFitness) {
@@ -117,7 +122,7 @@ class Population {
                 }
                 bestFitness = fitness;
                 bestIndividualIndex = i;
-            } else if(fitness > secondFitness) {
+            } else if((fitness >= secondFitness) && (i != bestIndividualIndex)) {
                 // If it is not better than best
                 // I check for the second
                 secondFitness = fitness;
@@ -129,6 +134,8 @@ class Population {
                 worstIndividualIndex = i;
             }
         }
+        // Calculate Mean
+        this.populationMeanFitness/=this.popSize;
     }
 
     //Get the fittest individual
@@ -146,4 +153,8 @@ class Population {
         return this.individuals[this.worstIndividualIndex];
     }
 
+    // Get Population Fitener
+    public double getPopulationMeanFitness() {
+        return populationMeanFitness;
+    }
 }
